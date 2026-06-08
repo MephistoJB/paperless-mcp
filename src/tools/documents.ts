@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { toolResult } from "./toolResult";
 
 export function registerDocumentTools(server, api) {
   server.tool(
@@ -53,7 +54,7 @@ export function registerDocumentTools(server, api) {
     async (args, extra) => {
       if (!api) throw new Error("Please configure API connection first");
       const { documents, method, ...parameters } = args;
-      return api.bulkEditDocuments(documents, method, parameters);
+      return toolResult(api.bulkEditDocuments(documents, method, parameters));
     }
   );
 
@@ -78,7 +79,7 @@ export function registerDocumentTools(server, api) {
       const blob = new Blob([binaryData]);
       const file = new File([blob], args.filename);
       const { file: _, filename: __, ...metadata } = args;
-      return api.postDocument(file, metadata);
+      return toolResult(api.postDocument(file, metadata));
     }
   );
 
@@ -91,7 +92,7 @@ export function registerDocumentTools(server, api) {
     },
     async (args, extra) => {
       if (!api) throw new Error("Please configure API connection first");
-      return api.getDocument(args.id);
+      return toolResult(api.getDocument(args.id));
     }
   );
 
@@ -105,7 +106,12 @@ export function registerDocumentTools(server, api) {
     },
     async (args, extra) => {
       if (!api) throw new Error("Please configure API connection first");
-      return api.searchDocuments(args.query, args.page, args.page_size);
+      const result = await api.searchDocuments(
+        args.query,
+        args.page,
+        args.page_size
+      );
+      return toolResult(result);
     }
   );
 
@@ -119,14 +125,14 @@ export function registerDocumentTools(server, api) {
     async (args, extra) => {
       if (!api) throw new Error("Please configure API connection first");
       const response = await api.downloadDocument(args.id, args.original);
-      return {
+      return toolResult({
         blob: Buffer.from(await response.arrayBuffer()).toString("base64"),
         filename:
           response.headers
             .get("content-disposition")
             ?.split("filename=")[1]
             ?.replace(/"/g, "") || `document-${args.id}`,
-      };
+      });
     }
   );
 }

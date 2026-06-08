@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { toolResult } from "./toolResult";
 
 export function registerTagTools(server, api) {
   server.tool(
@@ -8,7 +9,7 @@ export function registerTagTools(server, api) {
     // No parameters - returns all available tags
   }, async (args, extra) => {
     if (!api) throw new Error("Please configure API connection first");
-    return api.getTags();
+    return toolResult(api.getTags());
   });
 
   server.tool(
@@ -25,7 +26,7 @@ export function registerTagTools(server, api) {
     },
     async (args, extra) => {
       if (!api) throw new Error("Please configure API connection first");
-      return api.createTag(args);
+      return toolResult(api.createTag(args));
     }
   );
 
@@ -44,7 +45,7 @@ export function registerTagTools(server, api) {
     },
     async (args, extra) => {
       if (!api) throw new Error("Please configure API connection first");
-      return api.updateTag(args.id, args);
+      return toolResult(api.updateTag(args.id, args));
     }
   );
 
@@ -56,7 +57,7 @@ export function registerTagTools(server, api) {
     },
     async (args, extra) => {
       if (!api) throw new Error("Please configure API connection first");
-      return api.deleteTag(args.id);
+      return toolResult(api.deleteTag(args.id));
     }
   );
 
@@ -83,7 +84,7 @@ export function registerTagTools(server, api) {
     },
     async (args, extra) => {
       if (!api) throw new Error("Please configure API connection first");
-      return api.bulkEditObjects(
+      return toolResult(api.bulkEditObjects(
         args.tag_ids,
         "tags",
         args.operation,
@@ -94,7 +95,7 @@ export function registerTagTools(server, api) {
               merge: args.merge,
             }
           : {}
-      );
+      ));
     }
   );
 }
